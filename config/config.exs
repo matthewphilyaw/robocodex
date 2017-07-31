@@ -4,7 +4,7 @@ config :robocodex,
   game: %{
     bot: %{
       radius: 20,
-      radar_radius: 300,
+      radar_radius: 500,
     },
     arena: %{
       height: 700,

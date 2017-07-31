@@ -4,49 +4,51 @@ defmodule Robocodex.Display do
     degrees * (:math.pi / 180)
   end
 
-  def send_init do
-    arena = (Application.get_env :robocodex, :game).arena
+  def send_init(arena) do
+    arena_conf = (Application.get_env :robocodex, :game).arena
 
     init_cmd = %{
       "method" => "init",
       "height" => arena.height,
       "width" => arena.width,
-      "arenaColor" => arena.color,
-      "arenaBorderColor" => arena.borderColor
+      "arenaColor" => arena_conf.color,
+      "arenaBorderColor" => arena_conf.borderColor
     }
 
     send_req(init_cmd)
   end
 
-  def create_robot(x, y, ba, ra, ca, bc, rc, cc) do
-    bot = (Application.get_env :robocodex, :game).bot
+  def create_robot(bot) do
     disp = Application.get_env :robocodex, :display
 
+    {x, y} = bot.position
     %{
       "x" => x,
       "y" => y,
       "radius" => bot.radius,
-      "color" => bc,
+      "color" => bot.color,
       "heading" => %{
-        "angle" => dtr(ba),
+        "angle" => bot.heading,
         "length" => disp.heading_length,
-        "color" => bc
+        "color" => bot.color
       },
       "radar" => %{
-        "angle" => dtr(ra),
-        "arcAngle" => dtr(disp.radar_arc),
+        "angle" => bot.radar_arc_center,
+        "arcAngle" => bot.radar_arc,
         "radius" => bot.radar_radius,
-        "color" => rc
+        "color" => bot.color
       },
       "cannon" => %{
-        "angle" => dtr(ca),
+        "angle" => bot.cannon_angle,
         "length" => disp.cannon_length,
-        "color" => cc
+        "color" => bot.color
       }
     }
   end
 
-  def send_draw(bots) do
+  def send_draw(arena) do
+    bots = Enum.map(arena.bots, &create_robot/1)
+
     draw_cmd = %{
       "method" => "draw",
       "bots" => bots
